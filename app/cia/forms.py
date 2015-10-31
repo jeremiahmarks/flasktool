@@ -11,3 +11,9 @@ class AppApiForm(Form):
     appname = StringField("Appname", validators=[Required()])
     api_key = StringField("Api Key", validators=[Required()])
     submit = SubmitField("Next")
+
+class GetCompCSV(Form):
+    submit = SubmitField("selectFile")
+
+class SelectCompCSV(Form):
+    submit = SubmitField("NextStep")
