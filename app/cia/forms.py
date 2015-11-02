@@ -1,5 +1,5 @@
 from flask.ext.wtf import Form
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField, FileField
 from wtforms.validators import Required
 
 
@@ -13,6 +13,7 @@ class AppApiForm(Form):
     submit = SubmitField("Next")
 
 class GetCompCSV(Form):
+    thisfile = FileField("compCSV")
     submit = SubmitField("selectFile")
 
 class SelectCompCSV(Form):

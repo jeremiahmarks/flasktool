@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Author: jeremiah.marks
 # @Date:   2015-10-27 17:12:48
-# @Last Modified 2015-10-28
+# @Last Modified 2015-11-02
 from flask import Flask
 from flask.ext.bootstrap import Bootstrap
 from flask.ext.moment import Moment
@@ -23,7 +23,7 @@ def create_app(config_name):
     moment.init_app(app)
     db.init_app(app)
 
-    from .cia import main as main_blueprint
+    from .upload import main as main_blueprint
     app.register_blueprint(main_blueprint)
 
     return app

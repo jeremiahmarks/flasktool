@@ -34,17 +34,20 @@ def getCompanies():
     if form.is_submitted():
         print dir(form)
         print form.submit.data
+        session['compcsv'] = getFilePath()
         return redirect(url_for('.selectCompanies')) #This is just a place holder for now
     print dir(form)
     print form.submit.data
     return render_template('getcomps.html', form=form)
 
+
 @main.route('/getcomps', methods=['GET', 'POST'])
 def selectCompanies():
+    poop = getFilePath()
     form = SelectCompCSV()
     if form.is_submitted():
         return redirect(url_for('.getRelationshipsFile'))
-    return render_template('comps2.html', form=form)
+    return render_template('comps2.html', thisfile=session.get('compcsv'), form=form)
 
 @main.route('/getrels', methods=['GET', 'POST'])
 def getRelationshipsFile():
