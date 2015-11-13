@@ -20,31 +20,43 @@
       {% else %}
         <tr><td>{{ form.app() }}</td><td><input type="submit" name="btn" value="setapp"></td></tr>
       {% endif %}
+
+
       {% if apikey %}
         <tr><td>{{ form.apikey(value=apikey) }}</td><td><input type="submit" name="btn" value="setapikey"></td></tr>
       {% else %}
         <tr><td>{{ form.apikey() }}</td><td><input type="submit" name="btn" value="setapikey"></td></tr>
       {% endif %}
-      {% if csvfolder %}
-        <tr><td>{{ form.csvfolder(value=csvfolder) }}</td><td><input type="submit" name="btn" value="setcsvfolder"></td></tr>
+
+
+      {% if accountCSV %}
+        <tr><td>{{ form.accountCSV(value=accountCSV) }}</td><td><input type="submit" name="btn" value="setaccountCSV"></td></tr>
       {% else %}
-        <tr><td>{{ form.csvfolder() }}</td><td><input type="submit" name="btn" value="setcsvfolder"></td></tr>
+        <tr><td>{{ form.accountCSV() }}</td><td><input type="submit" name="btn" value="setaccountCSV"></td></tr>
       {% endif %}
-      {% if filesfolder %}
-        <tr><td>{{ form.filesfolder(value=filesfolder) }}</td><td><input type="submit" name="btn" value="setfilesfolder"></td></tr>
+
+
+      {% if attachmentCSV %}
+        <tr><td>{{ form.attachmentCSV(value=attachmentCSV) }}</td><td><input type="submit" name="btn" value="setattachmentCSV"></td></tr>
       {% else %}
-        <tr><td>{{ form.filesfolder() }}</td><td><input type="submit" name="btn" value="setfilesfolder"></td></tr>
+        <tr><td>{{ form.attachmentCSV() }}</td><td><input type="submit" name="btn" value="setattachmentCSV"></td></tr>
       {% endif %}
+
+
       {% if companyexport %}
         <tr><td>{{ form.companyexport(value=companyexport) }}</td><td><input type="submit" name="btn" value="setcompanyexport"></td></tr>
       {% else %}
         <tr><td>{{ form.companyexport() }}</td><td><input type="submit" name="btn" value="setcompanyexport"></td></tr>
       {% endif %}
-      {% if contactexport %}
-        <tr><td>{{ form.contactexport(value=contactexport) }}</td><td><input type="submit" name="btn" value="setcontactexport"></td></tr>
+
+
+      {% if filesfolder %}
+        <tr><td>{{ form.filesfolder(value=filesfolder) }}</td><td><input type="submit" name="btn" value="setfilesfolder"></td></tr>
       {% else %}
-        <tr><td>{{ form.contactexport() }}</td><td><input type="submit" name="btn" value="setcontactexport"></td></tr>
+        <tr><td>{{ form.filesfolder() }}</td><td><input type="submit" name="btn" value="setfilesfolder"></td></tr>
       {% endif %}
+
+
     </table>
     <input type="submit" name="btn" value="VerifyAndUpload">
   </form>

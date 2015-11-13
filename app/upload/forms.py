@@ -37,9 +37,9 @@ class MainForm(Form):
 
   app = StringField("app")
   apikey = StringField("apikey")
-  csvfolder = StringField("csvfolder")
-  filesfolder = StringField("filesfolder")
+  accountCSV = StringField("accountCSV")
+  attachmentCSV = StringField("attachmentCSV")
   companyexport = StringField("companyexport")
-  contactexport = StringField("contactexport")
+  filesfolder = StringField("filesfolder")
 
 

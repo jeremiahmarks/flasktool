@@ -24,18 +24,21 @@
 import csv
 import os
 import sys
+import base64
 
-
+import ISServer
+print 'a'
+DEFAULT_CONTACT_TO_ATTACH_TO = 1
 
 class FileLogician(object):
     """docstring for FileLogician
-        FileLogician will handle various methods
-        needed to match the data as needed.
-        Some methods that it will include, though,
-        will be the ability to get the first or all 
-        rows that match criteria.
-        Additionally, it will probably implement a v-lookup procedure.
-            Like seriously, why have I not done that yet?
+    FileLogician will handle various methods
+    needed to match the data as needed.
+    Some methods that it will include, though,
+    will be the ability to get the first or all 
+    rows that match criteria.
+    Additionally, it will probably implement a v-lookup procedure.
+        Like seriously, why have I not done that yet?
     """
     def __init__(self, apiConnection=None):
         super(FileLogician, self).__init__()
@@ -51,6 +54,8 @@ class FileLogician(object):
         self.AttachmentCSVpath=newAttachment
     def setexport(self, newexport):
         self.exportpath=newexport
+    def setfilefolder(self, pathtofolder):
+        self.filefolder = pathtofolder
 
     def startToProcess(self):
         if not all([self.Accountpath, self.AttachmentCSVpath, self.exportpath]):
@@ -61,21 +66,36 @@ class FileLogician(object):
             with open(self.AttachmentCSVpath, 'rUb') as infile:
                 thisreader = csv.DictReader(infile)
                 for eachrow in thisreader:
-                    thisfileupload={}
-                    thisfileupload['currentfilename']=eachrow['Id']
-                    thisfileupload['AccountId'] = eachrow['AccountId']
-                    thisfileupload['filename'] = eachrow['Name']
+                    if eachrow['AccountId'] not in self.acctidToContact:
+                        thisfileupload={}
+                        thisfileupload['currentfilename']=eachrow['Id']
+                        thisfileupload['AccountId'] = eachrow['AccountId']
+                        thisfileupload['filename'] = eachrow['Name']
+                        searchcriteria={}
+                        searchcriteria['Id'] = thisfileupload['AccountId']
+                        thisfileupload['companyName'] = thisAccountFile.getlineswith(searchcriteria)['Name']
+                        thisfileupload['Contact'] = {}
 
-                    searchcriteria={}
-                    searchcriteria['Id'] = thisfileupload['AccountId']
-                    
+                        searchcriteria = {}
+                        searchcriteria['Company'] = thisfileupload['companyName']
+                        matchingrow = thisexportfile.getlineswith(searchcriteria)
+                        thisfileupload['Contact']['FirstName']=matchingrow['Main Contact First Name']
+                        thisfileupload['Contact']['LastName'] = matchingrow['Main Contact Last Name']
+                        thisfileupload['Contact']['CompanyId'] = int(matchingrow['Id'])
 
-                    thisfileupload['companyName'] = thisAccountFile.getlineswith(searchcriteria)['Name']
+                        allmatching = self.svr.getallrecords('Contact', searchcriteria=searchcriteria)
+                        if len(allmatching) == 0:
+                            thisfileuploadd['conid'] = DEFAULT_CONTACT_TO_ATTACH_TO
+                        else:
+                            thisfileupload['conid'] = allmatching[0]['Id']
+                        self.acctidToContact[eachrow['AccountId']] = thisfileupload['conid']
+                    self.uploadfile(self.acctidToContact[eachrow['AccountId']], 
+                        eachrow['Name'],
+                        os.path.abspath(os.path.join(self.filefolder, eachrow['Id'])))
 
-
-
-
-
+    def uploadfile(self, contactid, filename, filepath):
+        print contactid
+        print self.svr.connection.FileService.uploadFile(self.svr.infusionsoftapikey, contactid, filename, base64.b64encode(open(filepath, 'rb').read()))
 
 class FileActions(object):
     """docstring for FileActions
@@ -100,7 +120,6 @@ class CSVFileActions(FileActions):
     """docstring for CSVFileActions"""
     def __init__(self, *args, **kwargs):
         super(CSVFileActions, self).__init__(*args, **kwargs)
-
 
     def getlineswith(self, 
                      searchcriteria,
@@ -165,5 +184,13 @@ class CSVFileActions(FileActions):
 
 
 
-
+if __name__ == '__main__':
+    print 'hello!'
+    connection = ISServer.ISServer('if188', 'f1a4ac7f9dbe2341ad0b84b52581c93e')
+    logic = FileLogician(connection)
+    logic.setAccount('C:\\Users\\jeremiah.marks\\Desktop\\actCrap\\if188\\Account.csv')
+    logic.setAttachment('C:\\Users\\jeremiah.marks\\Desktop\\actCrap\\if188\\Attachment.csv')
+    logic.setexport('C:\\Users\\jeremiah.marks\\Desktop\\actCrap\\if188\\companyexport.csv')
+    logic.setfilefolder('C:\\Users\\jeremiah.marks\\Desktop\\actCrap\\if188\\files')
+    logic.startToProcess()
 
