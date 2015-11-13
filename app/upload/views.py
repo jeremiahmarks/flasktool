@@ -12,7 +12,7 @@ import csv
 import glob
 import datetime
 import base64
-
+import pickle
 
 import Tkinter as tk
 import tkFileDialog
@@ -23,7 +23,7 @@ salesforceAccountIdToInfMainContactId={}
 
 startTimestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
 
-companyExportFileName="Account.csv"
+salesforceaccountfile="Account.csv"
 attachmentExportFileName="Attachment.csv"
 
 DEFAULT_CONTACT_TO_ATTACH_TO = 1
@@ -45,79 +45,146 @@ def addtolog(datatoadd):
     with open(logfile, 'ab+') as lfile:
         lfile.write(currentTimeStamp + "," + str(datatoadd) + '\n')
 
-def getprimarycontactid(connection, companyExportRow):
-    """This method aims to accept a row of data from a
-    Company export of Infusionsoft and match the name to a
-    contact id.  It will do this by pulling all records that
-    have company id == to the rows company id as well as matching
-    fname/lname data.
 
-    If there are multiple matching records, it will go with
-    the oldest record, unless the fields are blank, in which
-    case it will go with the DEFAULT_CONTACT_TO_ATTACH_TO
+
+
+# create a place to map salesforce AccountIDs to contactIds
+salesforceAccountIdToInfusionsoftContactId={}
+sfids=salesforceAccountIdToInfusionsoftContactId
+
+# create a variable to hold the path to the file that the customer exported
+###        ###
+###  TO DO ###
+###        ###
+### make sure to add exported file to the main method as a global. 
+exportedfile=''
+
+def getmatchingrows(filename, columnname, value):
+    """This method will return a list of csv rows
+    that have the matching value in the named
+    column.
     """
-    # if companyExportRow['Main Contact First Name'] and companyExportRow['Main Contact Last Name']:
-    if not ((companyExportRow['Main Contact First Name'] and len(companyExportRow['Main Contact First Name'])>0)
-            or (companyExportRow['Main Contact Last Name'] and len(companyExportRow['Main Contact Last Name']) > 0)):
-        searchcriteria = {}
-        searchcriteria["CompanyID"] = companyExportRow['Id']
-        if companyExportRow['Main Contact First Name'] and len(companyExportRow['Main Contact First Name']) > 0:
-            searchcriteria['FirstName'] = companyExportRow['Main Contact First Name']
-        if companyExportRow['Main Contact Last Name'] and len(companyExportRow['Main Contact Last Name']) > 0:
-            searchcriteria['LastName'] = companyExportRow['Main Contact Last Name']
-        allmatchingcontacts = connection.getallrecords('Contact', searchcriteria=searchcriteria, orderedby="Id")
-        if len(allmatchingcontacts) == 0:
-            return DEFAULT_CONTACT_TO_ATTACH_TO
-        elif len(allmatchingcontacts) == 1:
-            return allmatchingcontacts[0]['Id']
-        else:
-            return allmatchingcontacts[0]['Id']
+    matchingrows=[]
+    if filename and len(filename)==0:
+        print columnname, value
+        print """NameError('whoa nelly! you cannot use' + str(filename))"""
     else:
+        try:
+            with open(filename, 'rUb') as infile:
+                thisreader = csv.DictReader(infile)
+                if columnname not in thisreader.fieldnames:
+                    print "Error, attempted to find value %s in column '%s' of file '%s'" %(value, columnname, filename)
+                else:
+                    for eachrow in thisreader:
+                        if eachrow[columnname] == value:
+                            matchingrows.append(eachrow)
+        except Exception, e:
+            print Exception
+        finally:
+            return matchingrows
+
+def pickACompanyrecord(listOfCompaniesWithSameName):
+    """This method exists in case there are multiple
+    companies with the same name.  If there are, this
+    method will pick first by existance of a primary
+    contact, then, all other things being equal, 
+    by the lowest ID
+    """
+    print type(listOfCompaniesWithSameName)
+    print listOfCompaniesWithSameName
+    # bestmatch=listOfCompaniesWithSameName[0]
+    # for eachrecord in listOfCompaniesWithSameName:
+    #     if eachrecord['Main Contact First Name'] and eachrecord['Main Contact Last Name']:
+    #         if eachrecord['Id'] < bestmatch['Id']:
+    #             bestmatch=eachrecord
+    #         else:
+    #             if not  bestmatch['Main Contact First Name'] and bestmatch['Main Contact Last Name']:
+    #                 bestmatch=eachrecord
+    #                 # Basically, how this works is:
+    #                     # since we are evaluating using 'and' this means that if there is anything in the value
+    #                     # it is true. If there is not (or it is literally False, but duck typing)
+    #                     # the expression will evaluate to false.
+    #                     #
+    #                     # So what we are saying is "If best match does not have both a first name and a last name
+    #                     # then this is already a superior contact because it does have both"
+    #     elif bestmatch['Main Contact First Name'] and bestmatch['Main Contact Last Name']:
+    #         # we know that the record has one or none of the fn/ln
+    #         # that means that if the bestmatch has both, we are done
+    #         pass
+    #     # from here, we know that neither record has both names.
+    #     # Basically, this should be:  
+    #         # if either one has at least one value as well as a lower id, it is the best value.
+    #     elif bestmatch['Main Contact First Name'] or bestmatch['Main Contact Last Name']:
+    #         if bestmatch['Id']>eachrecord['Id']:
+    #             bestmatch = eachrecord['Id']
+    # return bestmatch
+
+
+def matchsfAccountIdtocontactid(salesforceaccountid, basefolder, apiconnection):
+    """This method use the getmatchingrows method to 
+    find the rows that match what they need to match.
+    """
+    print "a1"
+    global exportedfile
+    accountpath = os.path.join(basefolder, salesforceaccountfile)
+    matchingSFAccounts = getmatchingrows(accountpath, 'Id', salesforceaccountid)
+    if not matchingSFAccounts:
         return DEFAULT_CONTACT_TO_ATTACH_TO
-
-def matchSFIDtoInfId(salesforceAccountId, pathToCompFile):
-    """This method will accept a row of data from the
-    attachments export as well as the path to the
-    companyExportFileName. It will check to see if their is
-    an existing match in a global dictionary. If there is
-    it will return the ContactId
-    """
-    if salesforceAccountId in salesforceAccountIdToInfMainContactId.keys():
-        print "Yay, it is matched!"
-        return salesforceAccountIdToInfMainContactId[salesforceAccountId]
+    elif len(matchingSFAccounts)==0:
+        return DEFAULT_CONTACT_TO_ATTACH_TO
     else:
-        with open(pathToCompFile, 'rUb') as infile:
-            thisreader = csv.DictReader(infile)
-            for eachrow in thisreader:
-                if eachrow["Id"] == salesforceAccountId:
-                    thiscompname = eachrow["Name"]
-                    if thiscompname in infusionsoftCompanyToMainContactId.keys():
-                        print "This is that thing!"
-                        print infusionsoftCompanyToMainContactId[thiscompname]
-                        print thiscompname
-                        salesforceAccountIdToInfMainContactId[salesforceAccountId] = infusionsoftCompanyToMainContactId[thiscompname]
-                    else:
-                        salesforceAccountIdToInfMainContactId[salesforceAccountId] = DEFAULT_CONTACT_TO_ATTACH_TO
-                        addtolog("Count not find " + salesforceAccountId + " " + thiscompname)
-                    break
+        if len(matchingSFAccounts) > 1:
+            print "There is an error. There appear to be multiple records with the id " + str(salesforceaccountid)
+            return DEFAULT_CONTACT_TO_ATTACH_TO
+        else:
+            companyname = matchingSFAccounts[0]["Name"]
+            matchingInfusionsoftcompanies = getmatchingrows(exportedfile, 'Company', companyname)
+            if matchingInfusionsoftcompanies and len(matchingInfusionsoftcompanies) == 0:
+                return DEFAULT_CONTACT_TO_ATTACH_TO
+            selectedCompanyRecord=pickACompanyrecord(matchingInfusionsoftcompanies)
+            searchcriteria={}
+            if selectedCompanyRecord:
+                if 'Id' in selectedCompanyRecord.keys():
+                    searchcriteria['CompanyID'] = selectedCompanyRecord['Id']
+                if selectedCompanyRecord['Main Contact First Name']:
+                    searchcriteria['FirstName'] = selectedCompanyRecord['Main Contact First Name']
+                if selectedCompanyRecord['Main Contact Last Name']:
+                    searchcriteria['LastName'] = selectedCompanyRecord['Main Contact Last Name']
+                matchingcontacts=apiconnection.getallrecords('Contact', searchcriteria=searchcriteria, interestingdata=['Id'], orderedby='Id')
+                print searchcriteria
+                if matchingcontacts and len(matchingcontacts) == 0:
+                    return DEFAULT_CONTACT_TO_ATTACH_TO
+                else:
+                    return matchingcontacts[0]
             else:
-                addtolog("Could not find " + salesforceAccountId + " in the compexport")
-                salesforceAccountIdToInfMainContactId[salesforceAccountId] = DEFAULT_CONTACT_TO_ATTACH_TO
-        return salesforceAccountIdToInfMainContactId[salesforceAccountId]
+                return DEFAULT_CONTACT_TO_ATTACH_TO
 
-# def attachfile(eachrow, contactIdToAttachTo, session['filesfolder'], thisconnection)
-def attachfile(eachrow, contactIdToAttachTo, pathToFolder, thisconnection):
-    """This method accepts a row of data from a salesforce
-    Attachment.csv file, an Infusionsoft Contact Id, the
-    path to the folder that actually has all of the blobs,
-    and an API connection.
+def attachfile(pathtofile, nameToUploadAs, contactIdToAttachTo, apiConnectionToUse):
+    print apiConnectionToUse.connection.FileService.uploadFile(apiConnectionToUse.infusionsoftapikey, contactIdToAttachTo, nameToUploadAs, base64.b64encode(open(pathtofile, 'rUb').read()))
+
+def processthefiles(basefolder, apiConnectionToUse):
+    # The files should be structured as such:
+    # - MainFolder
+    # |--Files 
+    # |--| This folder contains all of the files that are to be uploaded
+    # |-Account.csv - the Account file from salesforce
+    # |-Attachment.csv - this file is from salesforces export, too.
+    # |-companyexport.csv - this is the full export of all fields from Infusionsoft
+    """This method will be the main logic operator
+    thing.  
     """
-    blobname = eachrow['Id']
-    print "attaching " + blobname + " to " + str(contactIdToAttachTo)
-    pathtoblob = os.path.abspath(os.path.join(pathToFolder, blobname))
-    # print "ER: " + str(eachrow)
-    print "PATHTOBLOB: " + pathtoblob
-    print thisconnection.connection.FileService.uploadFile(thisconnection.infusionsoftapikey, contactIdToAttachTo, eachrow['Name'], base64.b64encode(open(pathtoblob, 'rUb').read()))
+    with open(os.path.join(basefolder, attachmentExportFileName), 'rb') as infile:
+        thisreader = csv.DictReader(infile)
+        for eachrow in thisreader:
+            currentFilename=eachrow['Id']
+            realfilename=eachrow['Name']
+            currentAccount = eachrow['AccountId']
+            if currentAccount not in sfids.keys():
+                # Basically, if it has not been mapped yet, we are going
+                # to map it. Then, after everything else is done, we will
+                # reference the value through the key.
+                sfids[currentAccount] = matchsfAccountIdtocontactid(eachrow['AccountId'], basefolder, apiConnectionToUse)
+            attachfile(os.path.join(basefolder, "Files", currentFilename), realfilename, sfids[currentAccount], apiConnectionToUse)
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -166,64 +233,11 @@ def index():
             except Exception, e:
                 addtolog(str(Exception))
                 addtolog(str(e))
-            finally:
-                pass
+                flash(message)
             if not thisconnection.verifyconnection():
                 flash("There is a problem with the appname and API key. Please fix them.")
             # This is 2 - ensure that the files needed exist where they should be.
-            filesincsvfolder = glob.glob(os.path.join(session['csvfolder'], "*"))
-            for eachfilepath in filesincsvfolder:
-                if os.path.basename(eachfilepath) == companyExportFileName:
-                    hasOrigCompExp = True
-                    OrigCompExp = eachfilepath
-                if os.path.basename(eachfilepath) == attachmentExportFileName:
-                    hasOrigAtthExp = True
-                    OrigAtthExp = eachfilepath
-            if not hasOrigCompExp:
-                flash("I cannot find " + companyExportFileName + ".")
-            if not hasOrigAtthExp:
-                flash("I cannot find " + attachmentExportFileName + ".")
-            # Part 3, Process the files.
-            # Part 3a - match companyname to primarycontact
-            infusionsoftCompanyToMainContactId = {}
-            filesByAccountId = {}
-            accountIdToCompanyName={}
-            with open(session['companyexport'], 'rUb') as infile:
-                companyreader = csv.DictReader(infile)
-                for eachrow in companyreader:
-                    if eachrow['Company'] in infusionsoftCompanyToMainContactId.keys():
-                        addtolog(eachrow['Company'] + " already exists.")
-                    infusionsoftCompanyToMainContactId[eachrow['Company']]=getprimarycontactid(thisconnection, eachrow)
-            with open(OrigAtthExp, 'rUb') as attchIn:
-                attchInReader = csv.DictReader(attchIn)
-                for eachrow in attchInReader:
-                    contactIdToAttachTo = matchSFIDtoInfId(eachrow['AccountId'], OrigCompExp)
-                    attachfile(eachrow, contactIdToAttachTo, session['filesfolder'], thisconnection)
-
-            #         if eachrow['AccountId'] not in filesByAccountId.keys():
-            #             filesByAccountId[eachrow['AccountId']] = []
-            #         thisfilestuff = {}
-            #         thisfilestuff['fileid'] = eachrow['Id']
-            #         thisfilestuff['AccountId'] = eachrow['AccountId']
-            #         thisfilestuff['Name'] = eachrow['Name']
-            #         filesByAccountId[eachrow['AccountId']].append(thisfilestuff)
-            # for eachaccountid in filesByAccountId.keys():
-            #     with open(OrigCompExp, 'rUb') as infile:
-            #         yetAnotherReader = csv.DictReader(infile)
-            #         for eachrow in yetAnotherReader:
-            #             if eachrow['Id'] == eachaccountid:
-            #                 accountIdToCompanyName[eachaccountid] = {}
-            #                 accountIdToCompanyName[eachaccountid]['Name'] = eachrow['Name']
-            #                 break
-            # for eachaccountid in filesByAccountId.keys():
-            #     companyname = accountIdToCompanyName[eachaccountid]['Name']
-            #     if 'primaryContact' in accountIdToCompanyName[eachaccountid].keys():
-            #         contactid = accountIdToCompanyName[eachaccountid]['primaryContact']
-            #     else:
-            #         if companyname in infusionsoftCompanyByName.keys():
-            #             fname = infusionsoftCompanyByName[companyname]['contactFirstName']
-            #             lname = infusionsoftCompanyByName[companyname]['contactLastName']
-            #     # with open(OrigCompExp, 'rUb') as
+            processthefiles(session['csvfolder'], thisconnection)
 
     return render_template('allonepage.html', form=form, app = session["app"], apikey = session["apikey"], csvfolder = session["csvfolder"], filesfolder = session["filesfolder"], companyexport = session["companyexport"], contactexport = session["contactexport"])
 
