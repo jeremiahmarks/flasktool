@@ -195,14 +195,3 @@ class CSVFileActions(FileActions):
         
 
 
-
-if __name__ == '__main__':
-    print 'hello!'
-    connection = ISServer.ISServer('if188', 'f1a4ac7f9dbe2341ad0b84b52581c93e')
-    logic = FileLogician(connection)
-    logic.setAccount('C:\\Users\\jeremiah.marks\\Desktop\\actCrap\\if188\\Account.csv')
-    logic.setAttachment('C:\\Users\\jeremiah.marks\\Desktop\\actCrap\\if188\\Attachment.csv')
-    logic.setexport('C:\\Users\\jeremiah.marks\\Desktop\\actCrap\\if188\\companyexport.csv')
-    logic.setfilefolder('C:\\Users\\jeremiah.marks\\Desktop\\actCrap\\if188\\files')
-    logic.startToProcess()
-
