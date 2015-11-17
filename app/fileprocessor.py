@@ -121,6 +121,18 @@ class CSVFileActions(FileActions):
     def __init__(self, *args, **kwargs):
         super(CSVFileActions, self).__init__(*args, **kwargs)
 
+    def splitfile(self, maxsize=9961472):
+        """This method will take the original
+        file, split it, and then return a list
+        of CSVFileActions full of the child
+        files.
+        """
+        pass
+        currentsize=0
+        returnfiles=[]
+        with open(self.fpath, 'rb') as infile:
+            thisreader = csv.DictReader(infile)
+
     def getlineswith(self, 
                      searchcriteria,
                      first=True,
