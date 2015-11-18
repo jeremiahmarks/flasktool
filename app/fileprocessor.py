@@ -1,6 +1,7 @@
 #!/c/Users/jeremiah.marks/AppData/Local/Continuum/Anaconda2/python
-# So I am have not tested it yet, but this should be more or less what we need.
-# Well, mostly. Basically, don't use this yet, but it is almost there, I think.
+# Yay! I think it will work better now!
+
+
 
 #####################################
 # This file exists solely to house
@@ -43,7 +44,7 @@ class FileLogician(object):
     Additionally, it will probably implement a v-lookup procedure.
         Like seriously, why have I not done that yet?
     """
-    def __init__(self, apiConnection=None, logger=None):
+    def __init__(self, apiConnection=None, logger=True):
         super(FileLogician, self).__init__()
         self.svr = apiConnection
         self.acctidToContact={}
@@ -52,16 +53,27 @@ class FileLogician(object):
         self.exportpath = None
         self.logger=logger
         self.uploadedcsvfile='uploaded.csv'
+        self.logfile='logfile.txt'
+        self.htmlfile='uploadedfiles.html'
 
     def logdata(self, stringtowriteout):
-        if logger is None:
-            pass
-        else:
-            self.logger(stringtowriteout)
+        if self.logger:
+            with open(self.logfile, 'a+') as outfile:
+                outfile.write(stringtowriteout + '\n')
+
 
     def writecsvfile(self, dicttoupload):
         with open(self.uploadedcsvfile, 'a+') as outfile:
-            outfile.write(','.join([str(dicttoupload[x]) for x in sorted(dicttoupload.keys())]))
+            outfile.write(','.join([str(dicttoupload[x]) for x in sorted(dicttoupload.keys())]) + '\n')
+
+    def addtohtmlfile(self, filename, contactid, fileidininfusionaoft):
+        if not os.path.exists(self.htmlfile):
+            with open(self.htmlfile, 'w+') as outfile:
+                outfile.write("""<html>\n<body>\n<table>\n""")
+        with open(self.htmlfile, 'a+') as outfile:
+            outfile.write("""
+                    <tr><td><a href="https://xo263.infusionsoft.com/Download?Id=%i">%s</a></td><td>%i</td></tr>
+                    """ %(fileidininfusionaoft, filename, contactid))
 
     def setAccount(self, newAccount):
         self.Accountpath=newAccount
@@ -118,10 +130,11 @@ class FileLogician(object):
 
                         thisfileupload['Contact']['FirstName']=matchingrow['Main Contact First Name']
                         thisfileupload['Contact']['LastName'] = matchingrow['Main Contact Last Name']
-                        thisfileupload['Contact']['CompanyId'] = int(matchingrow['Id'])
+                        thisfileupload['Contact']['CompanyID'] = int(matchingrow['Id'])
+
                         self.logdata("FileLogician is about to do a search for " + str(thisfileupload['Contact']))
 
-                        allmatching = self.svr.getallrecords('Contact', searchcriteria=searchcriteria)
+                        allmatching = self.svr.getallrecords('Contact', searchcriteria= thisfileupload['Contact'])
                         if len(allmatching) == 0:
                             thisfileuploadd['conid'] = DEFAULT_CONTACT_TO_ATTACH_TO
                         else:
@@ -139,6 +152,7 @@ class FileLogician(object):
         self.logdata(logstr)
         print logstr
         self.writecsvfile({'contactid': contactid, 'filename': filename, 'filepath': filepath})
+        self.addtohtmlfile(filename, contactid, thisfileid)
 
 
 class FileActions(object):
