@@ -23,7 +23,7 @@ def create_app(config_name):
     moment.init_app(app)
     db.init_app(app)
 
-    from .upload import main as main_blueprint
+    from .filemanip import main as main_blueprint
     app.register_blueprint(main_blueprint)
 
     return app

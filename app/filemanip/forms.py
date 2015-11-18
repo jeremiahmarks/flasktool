@@ -28,13 +28,6 @@ class MainForm(Form):
     * path to company export
     * path to contact export
   """
-  # setapp = SubmitField("SetApp")
-  # setapikey = SubmitField('SetAPIKey')
-  # setcsvfolder = SubmitField("SetCsvFolder")
-  # setfilesfolder = SubmitField("SetFilesFolder")
-  # setcompanyexport = SubmitField("SetCompanyExport")
-  # setcontactexport = SubmitField('SetContactExport')
-
   app = StringField("app")
   apikey = StringField("apikey")
   accountCSV = StringField("accountCSV")
@@ -42,4 +35,6 @@ class MainForm(Form):
   companyexport = StringField("companyexport")
   filesfolder = StringField("filesfolder")
 
-
+class FileForm(Form):
+  file1 = StringField("file1")
+  file2 = StringField("file2")

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}VLookUpAwesomeness{% endblock %}
+
+{% block page_content %}
+    <div class="page-header">
+        <h1>Welcome to the CSV tool thing!</h1>
+    </div>
+    <div>
+        <form method="POST">
+            <table>
+                {% if file1 %}
+                    <tr><td>{{ form.file1(value=file1) }}</td><td><input type="submit" name='btn' value='setfile1'></td></tr>
+                {% else %}
+                    <tr><td>{{ form.file1() }}</td><td><input type="submit" name='btn' value='setfile1'></td></tr>
+                {% endif %}
+                {% if file2 %}
+                    <tr><td>{{ form.file2(value=file2) }}</td><td><input type="submit" name='btn' value='setfile2'></td></tr>
+                {% else %}
+                    <tr><td>{{ form.file2() }}</td><td><input type="submit" name='btn' value='setfile2'></td></tr>
+                {% endif %}
+            </table>
+            <input type='submit' name='btn' value="Match Columns">
+        </form>
+    </div>
+{% endblock %}
