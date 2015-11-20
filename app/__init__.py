@@ -23,7 +23,10 @@ def create_app(config_name):
     moment.init_app(app)
     db.init_app(app)
 
-    from .filemanip import main as main_blueprint
+    from .upload import main as main_blueprint
     app.register_blueprint(main_blueprint)
+
+    from .filemanip import csvBP  as csv_blueprint
+    app.register_blueprint(csv_blueprint)
 
     return app

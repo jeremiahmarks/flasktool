@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}The Inlaws - Pick the first column.{% endblock %}
+
+{% block page_content %}
+    <div class="page-header">
+        <h1>Wow, you're still here?</h1>
+    </div>
+    <div>
+        <form method="POST">
+            <table>
+                <tr>
+                    <td>
+                        So, I am going to have to make a form that displays
+                        all of the column names from the csv file here.
+                    </td>
+                </tr>
+            </table>
+            <input type='submit' name='btn' value="Match Columns">
+        </form>
+    </div>
+{% endblock %}
