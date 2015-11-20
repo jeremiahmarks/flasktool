@@ -9,5 +9,7 @@ That repo accompanies the [Flask Web Development book](http://amzn.com/144937262
 ##To do
 
 * add side navigation to allow users to change between functions
-* Steal parts of the [Tabbie](https://tabbie.io/) UI, perhaps. Basically, make each little tabbie element a separate process? [Forked Tabbie Source](https://github.com/jeremiahmarks/tabbie)
+* Steal parts of the [Tabbie](https://tabbie.io/) UI, perhaps. Basically, make each little tabbie element a separate process?
+  * [Forked Tabbie Source](https://github.com/jeremiahmarks/tabbie)
+  * [Spec Sheet for Material](https://www.google.com/design/spec/material-design/introduction.html)
 * Add functionality to do lots of things that are cool and helpful.
