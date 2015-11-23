@@ -31,31 +31,43 @@ def addtolog(datatoadd):
     with open(logfile, 'ab+') as lfile:
         lfile.write(currentTimeStamp + "," + str(datatoadd) + '\n')
 
-@main.route('/', methods=['GET', 'POST'])
-def index():
-    neededdata=['file1', 'file2']
-    for eachdatum in neededdata:
-        if neededdata not in session.keys():
-            session[eachdatum] = None
-    form = FileForm()
-    if form.is_submitted():
-        if request.form["btn"] == "setfile1":
-            session['file1'] = funcs.getFilePath()
-        if request.form["btn"] == "setfile2":
-            session['file2'] = funcs.getFilePath()
-    return render_template('vlookup.html', form=form, file1=session['file1'], file2=session['file2'])
+# @main.route('/', methods=['GET', 'POST'])
+# def index():
+#     neededdata=['file1', 'file2']
+#     for eachdatum in neededdata:
+#         if neededdata not in session.keys():
+#             session[eachdatum] = None
+#     form = FileForm()
+#     if form.is_submitted():
+#         if request.form["btn"] == "setfile1":
+#             session['file1'] = funcs.getFilePath()
+#         if request.form["btn"] == "setfile2":
+#             session['file2'] = funcs.getFilePath()
+#     return render_template('vlookup.html', form=form, file1=session['file1'], file2=session['file2'])
 
 @main.route('/files', methods=['GET', 'POST'])
 def start():
     # return redirect(url_for('csv_blueprint.index'))
     neededdata=['file1', 'file2']
-    for eachdatum in neededdata:
-        if neededdata not in session.keys():
-            session[eachdatum] = None
     form = FileForm()
     if form.is_submitted():
+        print session
         if request.form["btn"] == "setfile1":
             session['file1'] = funcs.getFilePath()
-        if request.form["btn"] == "setfile2":
-            session['file2'] = funcs.getFilePath()
-    return render_template('vlookup.html', form=form, file1=session['file1'], file2=session['file2'])
+        # if request.form["btn"] == "setfile2":
+        #     session['file2'] = funcs.getFilePath()
+        if request.form["btn"] == "Match Columns":
+            if session['file1'] and len(session['file1']) > 0:
+                print "yep!"
+                session['f1'] = fileprocessor.CSVFileActions(session['file1']).getcolnames()
+            else:
+                print "nope!"
+                session['f1'] = None
+            print session['f1']
+    else:
+        for eachdatum in neededdata:
+            if neededdata not in session.keys():
+                print "setting %s to None" %eachdatum
+                session[eachdatum] = None
+    return render_template('vlookup.html', form=form, file1=session['file1'])
+    # return render_template('vlookup.html', form=form, file1=session['file1'], file2=session['file2'])

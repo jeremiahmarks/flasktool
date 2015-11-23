@@ -1,25 +1,25 @@
 #!/c/Users/jeremiah.marks/AppData/Local/Continuum/Anaconda2/python
 #####################################
-# This file exists solely to house 
-# one point of logic, matching the 
-# data between the files. 
+# This file exists solely to house
+# one point of logic, matching the
+# data between the files.
 # it will use the following bits of data:
     # location of Account.csv
     # location of Attachment.csv
-    # location of a recent export of the 
-        # Infusionsoft company records, to 
+    # location of a recent export of the
+        # Infusionsoft company records, to
         # include the company name, the company
         # id, the main contact first/last name
-    # some form of api connection with a 
+    # some form of api connection with a
         # getallrecords method
         # .connection.FileService.uploadFile method
-    # location of the folder that contains all of the 
-    # files that need to be uploaded. 
-# 
-# 
-# 
-# 
-# 
+    # location of the folder that contains all of the
+    # files that need to be uploaded.
+#
+#
+#
+#
+#
 #####################################
 import csv
 import os
@@ -27,7 +27,7 @@ import sys
 import base64
 
 import ISServer
-print 'a'
+
 DEFAULT_CONTACT_TO_ATTACH_TO = 1
 
 class FileLogician(object):
@@ -35,7 +35,7 @@ class FileLogician(object):
     FileLogician will handle various methods
     needed to match the data as needed.
     Some methods that it will include, though,
-    will be the ability to get the first or all 
+    will be the ability to get the first or all
     rows that match criteria.
     Additionally, it will probably implement a v-lookup procedure.
         Like seriously, why have I not done that yet?
@@ -89,7 +89,7 @@ class FileLogician(object):
                         else:
                             thisfileupload['conid'] = allmatching[0]['Id']
                         self.acctidToContact[eachrow['AccountId']] = thisfileupload['conid']
-                    self.uploadfile(self.acctidToContact[eachrow['AccountId']], 
+                    self.uploadfile(self.acctidToContact[eachrow['AccountId']],
                         eachrow['Name'],
                         os.path.abspath(os.path.join(self.filefolder, eachrow['Id'])))
 
@@ -133,22 +133,22 @@ class CSVFileActions(FileActions):
         with open(self.fpath, 'rb') as infile:
             thisreader = csv.DictReader(infile)
 
-    def getlineswith(self, 
+    def getlineswith(self,
                      searchcriteria,
                      first=True,
                      sorting=False,
                      desiredColumns=False):
         """getlineswith accepts a dict of
         columnName->value pairs to search for.
-        If first is True and sorting is none 
+        If first is True and sorting is none
         it will stop the first time it finds
-        a matching row and return it. sorting 
-        will be done via whatever method is 
-        passed to sorting. Basically, it will 
+        a matching row and return it. sorting
+        will be done via whatever method is
+        passed to sorting. Basically, it will
         need to accept two dictionaries (rows
         in the csv file) and return whichever
         is the one that is now in "first".
-        If first is false, the method will 
+        If first is false, the method will
         return all rows that match in a list.
 
         edit to add: desired columns is there
@@ -190,8 +190,13 @@ class CSVFileActions(FileActions):
                     return sorting(returnlist)
                 else:
                     return returnlist
+    def getcolnames(self):
+        thesecols=[]
+        with open(self.fpath, 'rb') as infile:
+            thisreader = csv.DictReader(infile)
+            thesecols = list(thisreader.fieldnames)
+        return thesecols
 
 
-        
 
 

@@ -15,11 +15,6 @@
                 {% else %}
                     <tr><td>{{ form.file1() }}</td><td><input type="submit" name='btn' value='setfile1'></td></tr>
                 {% endif %}
-                {% if file2 %}
-                    <tr><td>{{ form.file2(value=file2) }}</td><td><input type="submit" name='btn' value='setfile2'></td></tr>
-                {% else %}
-                    <tr><td>{{ form.file2() }}</td><td><input type="submit" name='btn' value='setfile2'></td></tr>
-                {% endif %}
             </table>
             <input type='submit' name='btn' value="Match Columns">
         </form>

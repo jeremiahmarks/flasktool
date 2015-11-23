@@ -37,4 +37,4 @@ class MainForm(Form):
 
 class FileForm(Form):
   file1 = StringField("file1")
-  file2 = StringField("file2")
+  # file2 = StringField("file2")
