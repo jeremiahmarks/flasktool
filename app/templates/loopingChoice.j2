@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% macro csvcolumns(columnnames, wrapper=lambda x: "<tr><td>" + x + "</tr></td>" ) %}
+    <form method="POST">
+        {% for eachcolumn in columnnames %}
+            <input type="checkbox" name="maincolumn" value="{% eachcolumn %}">
+        {% endfor %}
+        <input type="submit" value="Select Main column">
+    </form>
+{% endmacro %}
+
+
+
+{# Python 2.7.10 |Anaconda 2.4.0 (64-bit)| (default, Oct 21 2015, 19:35:23) [MSC v.1500 64 bit (AMD64)] on win32
+Type "copyright", "credits" or "license()" for more information.
+DreamPie 1.2.1
+>>> def csvcolumns(columnnames, wrapper=lambda x: "<tr><td>" + x + "</tr></td>" ):
+...     for eachc in columnnames:
+...         print wrapper(eachc)
+>>> a=['a','b','c']
+>>> csvcolumns(a)
+<tr><td>a</tr></td>
+<tr><td>b</tr></td>
+<tr><td>c</tr></td>
+>>>  #}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Select the FKID of file 1</h1>
+  <form method="POST">
+    <table>
+
+
+
+    </table>
+    <input type="submit" name="btn" value="VerifyAndUpload">
+  </form>
+</div>
+{% endblock %}
