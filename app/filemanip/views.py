@@ -1,12 +1,12 @@
 from flask import render_template, session, redirect, url_for, current_app, request, flash
-from .. import db
-from ..models import User
 # from ..email import send_email
 from . import csvBP as main
-from .forms import FileForm
+from .forms import FileForm, csvColumnNames
 from .. import ISServer
 from .. import fileprocessor
 from .. import commonFunctions as funcs
+
+from wtforms import SubmitField
 
 import os
 import sys
@@ -16,58 +16,29 @@ import datetime
 import base64
 import pickle
 
-
-startTimestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-
-homefolder = os.path.expanduser('~')
-logfolder=os.path.abspath(os.path.join(homefolder, "Infusionsoft"))
-if not os.path.exists(logfolder):
-    os.makedirs(logfolder)
-logfile = os.path.abspath(os.path.join(logfolder, startTimestamp + "FileBoxUpload.csv"))
-
-
-def addtolog(datatoadd):
-    currentTimeStamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-    with open(logfile, 'ab+') as lfile:
-        lfile.write(currentTimeStamp + "," + str(datatoadd) + '\n')
-
-# @main.route('/', methods=['GET', 'POST'])
-# def index():
-#     neededdata=['file1', 'file2']
-#     for eachdatum in neededdata:
-#         if neededdata not in session.keys():
-#             session[eachdatum] = None
-#     form = FileForm()
-#     if form.is_submitted():
-#         if request.form["btn"] == "setfile1":
-#             session['file1'] = funcs.getFilePath()
-#         if request.form["btn"] == "setfile2":
-#             session['file2'] = funcs.getFilePath()
-#     return render_template('vlookup.html', form=form, file1=session['file1'], file2=session['file2'])
-
 @main.route('/files', methods=['GET', 'POST'])
 def start():
     # return redirect(url_for('csv_blueprint.index'))
     neededdata=['file1', 'file2']
     form = FileForm()
     if form.is_submitted():
-        print session
-        if request.form["btn"] == "setfile1":
-            session['file1'] = funcs.getFilePath()
-        # if request.form["btn"] == "setfile2":
-        #     session['file2'] = funcs.getFilePath()
-        if request.form["btn"] == "Match Columns":
-            if session['file1'] and len(session['file1']) > 0:
-                print "yep!"
-                session['f1'] = fileprocessor.CSVFileActions(session['file1']).getcolnames()
-            else:
-                print "nope!"
-                session['f1'] = None
-            print session['f1']
-    else:
-        for eachdatum in neededdata:
-            if neededdata not in session.keys():
-                print "setting %s to None" %eachdatum
-                session[eachdatum] = None
+        session['file1'] = {}
+        session['file1']['path'] = funcs.getFilePath()
+        session['file1']['columns'] = list(fileprocessor.CSVFileActions(session['file1']['path']).getcolnames())
+        return redirect(url_for('.chooseHeaders'))
     return render_template('vlookup.html', form=form, file1=session['file1'])
     # return render_template('vlookup.html', form=form, file1=session['file1'], file2=session['file2'])
+
+@main.route('/file1', methods=['GET', 'POST'])
+def chooseHeaders():
+    # This method will provide the screen to choose which
+    # the primary lookup column will be.
+    form = csvColumnNames()
+    if form.is_submitted():
+        # here we will need to save the column
+        session['file1']['maincol']=form.btn.data
+    return render_template('vlookup.html', form=form)
+
+@main.route('/file2', methods=['GET', 'POST'])
+def part2():
+    pass

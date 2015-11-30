@@ -1,7 +1,21 @@
 from flask.ext.wtf import Form
-from wtforms import StringField, SubmitField, FileField
+from wtforms import StringField, SubmitField, FileField, SelectField, widgets
 from wtforms.validators import Required
 
+
+class csvColumnNames(Form):
+  @classmethod
+  def addColumn(cls, name, field):
+    setattr(cls, name, field)
+    return cls
+  submit = SubmitField('Submit')
+
+# class columnsform(Form):
+#     string_of_files = ['one\r\ntwo\r\nthree\r\n']
+#     list_of_files = string_of_files[0].split()
+#     # create a list of value/description tuples
+#     files = [(x, x) for x in list_of_files]
+#     example = csvColumnNames('Label', choices=files)
 
 class NameForm(Form):
     name = StringField('What is your name?', validators=[Required()])

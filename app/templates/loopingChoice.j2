@@ -30,7 +30,14 @@ DreamPie 1.2.1
     <h1>Select the FKID of file 1</h1>
   <form method="POST">
     <table>
-
+        <tr>
+            <td>Please select the FKID column</td>
+        </tr>
+        {% for eachcolumn in csvcolumns %}
+            <tr>
+                <td>
+                    <input type='select'></input>
+        {% endfor %}
 
 
     </table>

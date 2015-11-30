@@ -10,11 +10,7 @@
     <div>
         <form method="POST">
             <table>
-                {% if file1 %}
-                    <tr><td>{{ form.file1(value=file1) }}</td><td><input type="submit" name='btn' value='setfile1'></td></tr>
-                {% else %}
-                    <tr><td>{{ form.file1() }}</td><td><input type="submit" name='btn' value='setfile1'></td></tr>
-                {% endif %}
+                <tr><td>{{ form.file1() }}</td><td><input type="submit" name='btn' value='setfile1'></td></tr>
             </table>
             <input type='submit' name='btn' value="Match Columns">
         </form>
