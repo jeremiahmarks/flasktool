@@ -130,7 +130,7 @@ ujson==1.33
 unicodecsv==0.14.1
 urllib3==1.12
 Werkzeug==0.10.4
-wheel==0.26.0
+wheel==0.38.1
 WTForms==1.0.5
 xlrd==0.9.4
 XlsxWriter==0.7.7
